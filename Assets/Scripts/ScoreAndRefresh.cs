@@ -7,30 +7,24 @@ using UnityEngine.UI;
  */
 public class ScoreAndRefresh : MonoBehaviour
 {
-    //获取分数文本
-    [SerializeField] private Text scoreTxt;
+    [SerializeField] private Text scoreTxt; //获取分数文本
 
-    //获取段位文本
-    [SerializeField] private Text rankTxt;
+    [SerializeField] private Text rankTxt; //获取段位文本
 
-    //获取按钮
-    [SerializeField] private List<Button> rewardBtn;
-    
-    //获取按钮文本
-    [SerializeField] private List<Text> rewardBtnTxt;
+    [SerializeField] private List<Button> rewardBtn; //获取按钮
 
+    [SerializeField] private List<Text> rewardBtnTxt; //获取按钮文本
 
-    //初始化总分数
-    private int sumOfScore = 3500;
+    private int sumOfScore = 3500; //初始化总分数
 
-    //段位
-    private int rank;
+    private int rank; //段位
 
     //用来查看afterName是否重复
     private int checkAfterName;
+    private int clickType; //clickType:1 - 加分按钮；2 - 刷新赛季按钮
 
     //绑定加分按钮的点击事件
-    public void OnClick()
+    public void AddScore()
     {
         sumOfScore += 100;
         scoreTxt.text = "SCORE: " + sumOfScore;
@@ -47,18 +41,9 @@ public class ScoreAndRefresh : MonoBehaviour
             {
                 rank = sumOfScore / 1000 - 3;
                 rankTxt.text = "RANK: 段位" + rank;
-                int afterName = (sumOfScore - 4000) / 200;
-                if (sumOfScore >= 4200 && sumOfScore % 1000 != 0 && checkAfterName != afterName)
-                {
-                    checkAfterName = afterName;
-                    if (afterName == 5 || afterName == 10||rewardBtnTxt[afterName - 1].text=="奖励已领取！")
-                    {
-                        return;
-                    }
-                    //到达段位后将奖励按钮生效并修改按钮文本 
-                    rewardBtn[afterName - 1].enabled = true;
-                    rewardBtnTxt[afterName - 1].text = "可领取";
-                }
+                
+                clickType = 1;
+                ResetBtn();
             }
         }
     }
@@ -82,33 +67,61 @@ public class ScoreAndRefresh : MonoBehaviour
             sumOfScore -= (sumOfScore - 4000) / 2;
         }
 
+        clickType = 2;
+        ResetBtn();
+
         scoreTxt.text = "SCORE: " + sumOfScore;
         //将可领取的按钮生效，并修改文本
-        for (var i = 1; i <= (sumOfScore - 4000) / 200 + 1; i++)
-        {
-            if (i == 5 || i == 10)
-            {
-                continue;
-            }
-
-            rewardBtn[i - 1].enabled = true;
-            rewardBtnTxt[i - 1].text = "可领取";
-        }
-
-        //将不可领取的按钮失效并修改文本
-        for (int i = 9; i > (sumOfScore - 4000) / 200; i--)
-        {
-            if (i == 5 || i == 10)
-            {
-                continue;
-            }
-
-            rewardBtn[i - 1].enabled = false;
-            rewardBtnTxt[i - 1].text = "未达到段位";
-        }
-
         //更新分数和段位的文本值
         rank = sumOfScore / 1000 - 3;
         rankTxt.text = "RANK: 段位" + rank;
+    }
+
+    ///根据不同的按钮触发不同的按钮重置
+    private void ResetBtn()
+    {
+        //加分按钮
+        if (clickType == 1)
+        {
+            int afterName = (sumOfScore - 4000) / 200;
+            if (sumOfScore >= 4200 && sumOfScore % 1000 != 0 && checkAfterName != afterName)
+            {
+                checkAfterName = afterName;
+                if (afterName == 5 || afterName == 10 || rewardBtnTxt[afterName - 1].text == "奖励已领取！")
+                {
+                    return;
+                }
+
+                //到达段位后将奖励按钮生效并修改按钮文本 
+                rewardBtn[afterName - 1].enabled = true;
+                rewardBtnTxt[afterName - 1].text = "可领取";
+            }
+        }
+        //赛季刷新按钮
+        else if (clickType == 2)
+        {
+            for (var i = 1; i <= (sumOfScore - 4000) / 200 + 1; i++)
+            {
+                if (i == 5 || i == 10)
+                {
+                    continue;
+                }
+
+                rewardBtn[i - 1].enabled = true;
+                rewardBtnTxt[i - 1].text = "可领取";
+            }
+
+            //将不可领取的按钮失效并修改文本
+            for (int i = 9; i > (sumOfScore - 4000) / 200; i--)
+            {
+                if (i == 5 || i == 10)
+                {
+                    continue;
+                }
+
+                rewardBtn[i - 1].enabled = false;
+                rewardBtnTxt[i - 1].text = "未达到段位";
+            }
+        }
     }
 }
